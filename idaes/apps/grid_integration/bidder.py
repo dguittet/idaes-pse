@@ -557,7 +557,7 @@ class StochasticProgramBidder(AbstractBidder):
         )
 
     def compute_real_time_bids(
-        self, date, hour, realized_day_ahead_prices, realized_day_ahead_dispatches
+        self, date, hour, realized_day_ahead_prices, realized_day_ahead_dispatches, **kwargs
     ):
 
         """

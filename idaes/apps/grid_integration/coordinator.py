@@ -80,8 +80,10 @@ class DoubleLoopCoordinator:
         context.register_before_operations_solve_callback(self.pass_static_params_to_RT)
         context.register_before_operations_solve_callback(self.bid_into_RTM)
         context.register_after_operations_callback(self.track_sced_signal)
+        context.register_after_operations_callback(self.write_plugin_results)
         context.register_update_operations_stats_callback(self.update_observed_dispatch)
         context.register_after_ruc_activation_callback(self.activate_pending_DA_data)
+        
         context.register_finalization_callback(self.write_plugin_results)
 
         return
@@ -655,11 +657,14 @@ class DoubleLoopCoordinator:
         date = simulator.time_manager.current_time.date
         hour = simulator.time_manager.current_time.hour
 
+        implemented_profile = self.tracker.tracking_model_object.get_implemented_profile(self.tracker.model.fs, 3)
+
         bids = self.bidder.compute_real_time_bids(
             date=date,
             hour=hour,
             realized_day_ahead_prices=self.current_avail_DA_prices,
             realized_day_ahead_dispatches=self.current_avail_DA_dispatches,
+            tracker_profile=implemented_profile
         )
 
         # pass bids into sced model
@@ -793,7 +798,7 @@ class DoubleLoopCoordinator:
 
             simulator: Prescient simulator.
 
-            ops_stats: Prescient operation statitstic object
+            ops_stats: Prescient operation statistic object
 
         Returns:
             None
@@ -840,7 +845,7 @@ class DoubleLoopCoordinator:
         self.current_avail_DA_prices = self.current_DA_prices
         self.current_avail_DA_dispatches = self.current_DA_dispatches
 
-    def write_plugin_results(self, options, simulator):
+    def write_plugin_results(self, options, simulator, *args):
 
         """
         After the simulation is completed, the plugins can write their own customized
